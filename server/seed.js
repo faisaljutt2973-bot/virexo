@@ -1,5 +1,4 @@
-// One-time script to populate the database with products from FakeStoreAPI.
-// Run this from the server folder: node seed.js
+import 'dotenv/config';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { importFakeStoreProducts } from './services/fakeStoreService.js';
