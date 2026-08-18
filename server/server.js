@@ -24,38 +24,89 @@ import './models/Review.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true,
-}));
+// =====================================================
+// CORS CONFIGURATION
+// =====================================================
+
+const allowedOrigins = [
+  'https://virexo-gilt.vercel.app',
+  'https://virexo-p7n7ffu6y-ofc-me.vercel.app',
+  'https://virexo-1uew0hqlg-ofc-me.vercel.app',
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests that don't have an Origin header
+      // (for example, Postman or server-to-server requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow known Vercel frontend URLs
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log('Blocked CORS origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
+
+// =====================================================
+// GENERAL MIDDLEWARE
+// =====================================================
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
+// =====================================================
+// CONNECT TO MONGODB
+// =====================================================
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('✓ MongoDB connected'))
   .catch((err) => console.error('✗ MongoDB connection error:', err));
 
-// API Routes
+// =====================================================
+// API ROUTES
+// =====================================================
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 
-// Health check
+// =====================================================
+// HEALTH CHECK
+// =====================================================
+
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Server is running' });
+  res.json({
+    success: true,
+    message: 'Server is running',
+  });
 });
 
-// 404 handler
+// =====================================================
+// 404 HANDLER
+// =====================================================
+
 app.use('*', (req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
 });
 
-// Start server
+// =====================================================
+// START SERVER
+// =====================================================
+
 app.listen(PORT, () => {
   console.log(`✓ Virexo Backend running on http://localhost:${PORT}`);
 });
